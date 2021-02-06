@@ -6,15 +6,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using WooliesChallenge.Application.Interfaces;
 using WooliesChallenge.Application.Helpers;
+using System;
+using WooliesChallenge.Application.Models;
+using System.Collections.Generic;
 
 namespace WooliesChallenge.Functions
 {
-    public class WooliesFunctions
+    public class WooliesFunctions// : IFunctionExceptionFilter
     {
         private readonly IUserService _userService;
-        public WooliesFunctions(IUserService userService)
+        private readonly IResourceService _resourceService;
+        public WooliesFunctions(IUserService userService,IResourceService resourceService)
         {
-            _userService = userService;            
+            _userService = userService;
+            _resourceService = resourceService;
         }
 
         [FunctionName("GetUser")]
@@ -22,8 +27,44 @@ namespace WooliesChallenge.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Constants.RouteAnswers)] HttpRequest req,
             ILogger log)
         {
-            var result = _userService.GetUser();
+            User result = null;
+            try
+            {
+                log.LogInformation("Get User started");
+                result = _userService.GetUser();
+            }
+            catch(Exception ex)
+            {
+                log.LogError("The error occured : -" + ex.Message + " - " + ex.StackTrace);
+            }
+                
+                return new OkObjectResult(result);
+        }
+
+        [FunctionName("GetSortedProducts")]
+        public async Task<IActionResult> GetSortedProducts(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Constants.RouteProducts)] HttpRequest req,
+            ILogger log)
+        {
+            List<Product> result = null;
+            try
+            {
+                log.LogInformation("GetSortedProduct started");
+                SortOption sortValue = Helper.GetEnumValue(Convert.ToString(req.Query["sortOption"]));
+                var respResource = sortValue == SortOption.Recommended ? await _resourceService.GetShopperHistory() : await _resourceService.GetProducts();
+                result = Helper.SortProducts(respResource, sortValue);
+            }
+            catch (Exception ex)
+            {
+                log.LogError("The error occured : -" + ex.Message + " - " + ex.StackTrace);
+            }
+
             return new OkObjectResult(result);
         }
+        //public Task OnExceptionAsync(FunctionExceptionContext exceptionContext, CancellationToken cancellationToken)
+        //{
+        //    log.WriteLine($"Exception raised by the application {exceptionContext.Exception.ToString()}");
+        //    return Task.CompletedTask;
+        //}
     }
 }

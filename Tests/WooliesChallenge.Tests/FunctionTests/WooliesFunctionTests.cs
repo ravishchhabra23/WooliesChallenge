@@ -10,14 +10,25 @@ using System.IO;
 using System.Threading.Tasks;
 using WooliesChallenge.Application.Interfaces;
 using WooliesChallenge.Application.Models;
-using WooliesChallenge.Application.Helpers;
-using Newtonsoft.Json;
 
 namespace WooliesChallenge.Tests.FunctionTests
 {
     [TestClass]
     public class WooliesFunctionTests
     {
+        private MockRepository _repository;
+        private Mock<IUserService> _userService;
+        private Mock<IResourceService> _resourceService;
+        private Mock<Microsoft.Extensions.Logging.ILogger> _log;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            _repository = new MockRepository(MockBehavior.Default);
+            _userService = _repository.Create<IUserService>();
+            _log = _repository.Create<Microsoft.Extensions.Logging.ILogger>();
+            _resourceService = _repository.Create<IResourceService>();
+        }
         private HttpRequest HttpRequestSetup(Dictionary<String, StringValues> query, string body)
         {
             var reqMock = new Mock<HttpRequest>();
@@ -38,17 +49,13 @@ namespace WooliesChallenge.Tests.FunctionTests
             var query = new Dictionary<String, StringValues>();
             string body = "";
             int targetStatusCode = 200;
-            var targetResult = ReturnUser();
+            var targetResult = TestHelper.ReturnUser();
+            _userService.Setup(p => p.GetUser()).Returns(targetResult);
 
-            MockRepository repository = new MockRepository(MockBehavior.Default);
-            var userService = repository.Create<IUserService>();
-            userService.Setup(p => p.GetUser()).Returns(ReturnUser());
-
-            var log = repository.Create<Microsoft.Extensions.Logging.ILogger>();
-            var userServiceFunction = new WooliesChallenge.Functions.WooliesFunctions(userService.Object);
+            var userServiceFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
 
             var result = await userServiceFunction.GetUser(req: HttpRequestSetup(query, body),
-                log: log.Object);
+                log: _log.Object);
             var resultObject = (OkObjectResult)result;
             Assert.IsNotNull(resultObject);
             Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
@@ -57,9 +64,27 @@ namespace WooliesChallenge.Tests.FunctionTests
             Assert.AreEqual(targetResult.Name, userExpected.Name);
         }
 
-        private User ReturnUser()
+        [TestMethod]
+        public async Task GetSortedProduct_High_Success()
         {
-            return new User { Name = Constants.Name, Token = Constants.Token };
+            var query = new Dictionary<String, StringValues>();
+            query.Add("sortOption", "High");
+            string body = "";
+            int targetStatusCode = 200;
+            string jsonText = @"[{""name"": ""Test Product A"",""price"": 99.99,""quantity"": 0 },
+                                   {""name"": ""Test Product B"",""price"": 101.99,""quantity"": 0}]";
+
+            _resourceService.Setup(p => p.GetProducts()).ReturnsAsync(jsonText);
+
+            var sortProductFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
+
+            var result = await sortProductFunction.GetSortedProducts(req: HttpRequestSetup(query, body),
+                log: _log.Object);
+            var resultObject = (OkObjectResult)result;
+            Assert.IsNotNull(resultObject);
+            Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
+            var targetObject = resultObject.Value as List<Product>;
+            Assert.AreEqual(Convert.ToDecimal(101.99), targetObject[0].Price);
         }
     }
 }
