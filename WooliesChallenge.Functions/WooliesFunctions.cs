@@ -7,15 +7,15 @@ using Microsoft.Extensions.Logging;
 using WooliesChallenge.Application.Interfaces;
 using WooliesChallenge.Application.Helpers;
 using System;
-using WooliesChallenge.Application.Models;
-using System.Collections.Generic;
+using System.Reflection;
 
 namespace WooliesChallenge.Functions
 {
-    public class WooliesFunctions// : IFunctionExceptionFilter
+    public class WooliesFunctions
     {
         private readonly IUserService _userService;
         private readonly IResourceService _resourceService;
+
         public WooliesFunctions(IUserService userService,IResourceService resourceService)
         {
             _userService = userService;
@@ -27,18 +27,10 @@ namespace WooliesChallenge.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Constants.RouteAnswers)] HttpRequest req,
             ILogger log)
         {
-            User result = null;
-            try
-            {
-                log.LogInformation("Get User started");
-                result = _userService.GetUser();
-            }
-            catch(Exception ex)
-            {
-                log.LogError("The error occured : -" + ex.Message + " - " + ex.StackTrace);
-            }
-                
-                return new OkObjectResult(result);
+            log.LogInformation(Constants.OperationStarted + MethodInfo.GetCurrentMethod().Name);
+            var result = await _userService.GetUser();
+            log.LogInformation(Constants.OperationCompleted + MethodInfo.GetCurrentMethod().Name);
+            return new OkObjectResult(result);
         }
 
         [FunctionName("GetSortedProducts")]
@@ -46,19 +38,11 @@ namespace WooliesChallenge.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Constants.RouteProducts)] HttpRequest req,
             ILogger log)
         {
-            List<Product> result = null;
-            try
-            {
-                log.LogInformation("GetSortedProduct started");
-                SortOption sortValue = Helper.GetEnumValue(Convert.ToString(req.Query["sortOption"]));
-                var respResource = sortValue == SortOption.Recommended ? await _resourceService.GetShopperHistory() : await _resourceService.GetProducts();
-                result = Helper.SortProducts(respResource, sortValue);
-            }
-            catch (Exception ex)
-            {
-                log.LogError("The error occured : -" + ex.Message + " - " + ex.StackTrace);
-            }
-
+            log.LogInformation(Constants.OperationStarted + MethodInfo.GetCurrentMethod().Name);
+            SortOption sortValue = Helper.GetEnumValue(Convert.ToString(req.Query["sortOption"]));
+            var respResource = sortValue == SortOption.Recommended ? await _resourceService.GetShopperHistory() : await _resourceService.GetProducts();
+            var result = Helper.SortProducts(respResource, sortValue);
+            log.LogInformation(Constants.OperationCompleted + MethodInfo.GetCurrentMethod().Name);
             return new OkObjectResult(result);
         }
 
@@ -67,25 +51,12 @@ namespace WooliesChallenge.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Constants.RouteTrolleyCalculator)] HttpRequest req,
             ILogger log)
         {
-            decimal result= decimal.Zero;
-            try
-            {
-                log.LogInformation("GetTrolleyCalculation started");
-                var trolleyRequest = await Helper.ReadRequestBody(req.Body);
-                var respResource = await _resourceService.GetTrolleyCalculation(trolleyRequest);
-                result = Helper.DeSerializeInput<decimal>(respResource);
-            }
-            catch (Exception ex)
-            {
-                log.LogError("The error occured : -" + ex.Message + " - " + ex.StackTrace);
-            }
-
+            log.LogInformation(Constants.OperationStarted + MethodInfo.GetCurrentMethod().Name);
+            var trolleyRequest = await Helper.ReadRequestBody(req.Body);
+            var respResource = await _resourceService.GetTrolleyCalculation(trolleyRequest);
+            var result = Helper.DeSerializeInput<decimal>(respResource);
+            log.LogInformation(Constants.OperationCompleted + MethodInfo.GetCurrentMethod().Name);
             return new OkObjectResult(result);
         }
-        //public Task OnExceptionAsync(FunctionExceptionContext exceptionContext, CancellationToken cancellationToken)
-        //{
-        //    log.WriteLine($"Exception raised by the application {exceptionContext.Exception.ToString()}");
-        //    return Task.CompletedTask;
-        //}
     }
 }

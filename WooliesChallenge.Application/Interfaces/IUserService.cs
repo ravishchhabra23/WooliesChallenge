@@ -1,9 +1,10 @@
-﻿using WooliesChallenge.Application.Models;
+﻿using System.Threading.Tasks;
+using WooliesChallenge.Application.Models;
 
 namespace WooliesChallenge.Application.Interfaces
 {
     public interface IUserService
     {
-        User GetUser();
+        Task<User> GetUser();
     }
 }

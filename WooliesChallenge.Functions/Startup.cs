@@ -41,7 +41,7 @@ namespace WooliesChallenge.Functions
                  client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                  client.DefaultRequestHeaders.Add("User-Agent", "WooliesChallenge");
              })
-            .SetHandlerLifetime(TimeSpan.FromMinutes(2))  //Set lifetime to two minutes
+            .SetHandlerLifetime(TimeSpan.FromMinutes(5))  //Set lifetime to two minutes
             .AddPolicyHandler(GetJitterRetryPolicy());
         }
         //For high concurrency and scalable systems under high contention, it improves the performance by adding a jitter strategy (randomness) to exponential retry 

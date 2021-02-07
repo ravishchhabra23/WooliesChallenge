@@ -13,5 +13,8 @@
         public const string TrolleyCalculatorUrl = "trolleyCalculator?token=";
         public const string ApplicationJsonType = "application/json";
         public const string TestWooliesBaseUrl = "http://dev-wooliesx-recruitment.azurewebsites.net/";
+        public const string CustomErrorMessage = "An error has occured while executing the function.";
+        public const string OperationStarted = "Started operation :-";
+        public const string OperationCompleted = "Completed operation :-";
     }
 }

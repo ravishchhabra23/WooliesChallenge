@@ -52,7 +52,7 @@ namespace WooliesChallenge.Tests.FunctionTests
             string body = "";
             int targetStatusCode = 200;
             var targetResult = TestHelper.ReturnUser();
-            _userService.Setup(p => p.GetUser()).Returns(targetResult);
+            _userService.Setup(p => p.GetUser()).ReturnsAsync(targetResult);
 
             var userServiceFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
 
