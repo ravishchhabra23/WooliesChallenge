@@ -7,7 +7,7 @@ Open the solution in VS 2019. Compile the solution  and set the project "Woolies
 The function app is hosted in Azure cloud and can be access with the below mentioned urls.
               
 ### Exercise 1 
-This excercise returns a User onject with name and a token.
+This excercise returns a User object with a name and the token.
 
  `<link>` : https://woolieschallengefunctions.azurewebsites.net/api/answers/user?
  
@@ -17,7 +17,7 @@ The sort option "Recommended" calls another Resource API and sorts with populari
 
 `<link>` : https://woolieschallengefunctions.azurewebsites.net/api/sort?
 
-Note: The given link to test fails for "Recommended" option but passes for all others.
+Note: The given woolies link to test fails for "Recommended" option but passes for all others.
 
 ### Exercise 3
 This excercise calls another resource to calculate the trolley total.
