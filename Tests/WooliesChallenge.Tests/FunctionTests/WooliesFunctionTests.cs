@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using WooliesChallenge.Application.Interfaces;
 using WooliesChallenge.Application.Models;
+using System.Linq;
 
 namespace WooliesChallenge.Tests.FunctionTests
 {
@@ -65,14 +67,14 @@ namespace WooliesChallenge.Tests.FunctionTests
         }
 
         [TestMethod]
-        public async Task GetSortedProduct_High_Success()
+        public async Task GetSortedProduct_Low_Success()
         {
             var query = new Dictionary<String, StringValues>();
-            query.Add("sortOption", "High");
+            query.Add("sortOption", "Low");
             string body = "";
             int targetStatusCode = 200;
-            string jsonText = @"[{""name"": ""Test Product A"",""price"": 99.99,""quantity"": 0 },
-                                   {""name"": ""Test Product B"",""price"": 101.99,""quantity"": 0}]";
+            var products = TestHelper.ReturnProductsForSort();
+            string jsonText = JsonConvert.SerializeObject(products);
 
             _resourceService.Setup(p => p.GetProducts()).ReturnsAsync(jsonText);
 
@@ -84,7 +86,109 @@ namespace WooliesChallenge.Tests.FunctionTests
             Assert.IsNotNull(resultObject);
             Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
             var targetObject = resultObject.Value as List<Product>;
-            Assert.AreEqual(Convert.ToDecimal(101.99), targetObject[0].Price);
+            var lowerPricedProduct = products.OrderBy(p => p.Price).FirstOrDefault();
+
+            Assert.AreEqual(Convert.ToDecimal(lowerPricedProduct.Price), targetObject[0].Price);
+        }
+
+
+        [TestMethod]
+        public async Task GetSortedProduct_High_Success()
+        {
+            var query = new Dictionary<String, StringValues>();
+            query.Add("sortOption", "High");
+            string body = "";
+            int targetStatusCode = 200;
+            var products = TestHelper.ReturnProductsForSort();
+            string jsonText = JsonConvert.SerializeObject(products);
+
+            _resourceService.Setup(p => p.GetProducts()).ReturnsAsync(jsonText);
+
+            var sortProductFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
+
+            var result = await sortProductFunction.GetSortedProducts(req: HttpRequestSetup(query, body),
+                log: _log.Object);
+            var resultObject = (OkObjectResult)result;
+            Assert.IsNotNull(resultObject);
+            Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
+            var targetObject = resultObject.Value as List<Product>;
+            var lowerPricedProduct = products.OrderByDescending(p => p.Price).FirstOrDefault();
+
+            Assert.AreEqual(Convert.ToDecimal(lowerPricedProduct.Price), targetObject[0].Price);
+        }
+
+        [TestMethod]
+        public async Task GetSortedProduct_Ascending_Success()
+        {
+            var query = new Dictionary<String, StringValues>();
+            query.Add("sortOption", "Ascending");
+            string body = "";
+            int targetStatusCode = 200;
+            var products = TestHelper.ReturnProductsForSort();
+            string jsonText = JsonConvert.SerializeObject(products);
+
+            _resourceService.Setup(p => p.GetProducts()).ReturnsAsync(jsonText);
+
+            var sortProductFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
+
+            var result = await sortProductFunction.GetSortedProducts(req: HttpRequestSetup(query, body),
+                log: _log.Object);
+            var resultObject = (OkObjectResult)result;
+            Assert.IsNotNull(resultObject);
+            Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
+            var targetObject = resultObject.Value as List<Product>;
+            var lowerPricedProduct = products.OrderBy(p => p.Name).FirstOrDefault();
+
+            Assert.AreEqual(lowerPricedProduct.Name, targetObject[0].Name);
+        }
+
+        [TestMethod]
+        public async Task GetSortedProduct_Descending_Success()
+        {
+            var query = new Dictionary<String, StringValues>();
+            query.Add("sortOption", "Descending");
+            string body = "";
+            int targetStatusCode = 200;
+            var products = TestHelper.ReturnProductsForSort();
+            string jsonText = JsonConvert.SerializeObject(products);
+
+            _resourceService.Setup(p => p.GetProducts()).ReturnsAsync(jsonText);
+
+            var sortProductFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
+
+            var result = await sortProductFunction.GetSortedProducts(req: HttpRequestSetup(query, body),
+                log: _log.Object);
+            var resultObject = (OkObjectResult)result;
+            Assert.IsNotNull(resultObject);
+            Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
+            var targetObject = resultObject.Value as List<Product>;
+            var lowerPricedProduct = products.OrderByDescending(p => p.Name).FirstOrDefault();
+
+            Assert.AreEqual(lowerPricedProduct.Name, targetObject[0].Name);
+        }
+
+        [TestMethod]
+        public async Task GetSortedProduct_SortRecommended_Success()
+        {
+            var query = new Dictionary<String, StringValues>();
+            query.Add("sortOption", "Recommended");
+            string body = "";
+            int targetStatusCode = 200;
+            var shopperHistory = TestHelper.ReturnProductsForSortRecommended();
+            string jsonText = JsonConvert.SerializeObject(shopperHistory);
+
+            _resourceService.Setup(p => p.GetShopperHistory()).ReturnsAsync(jsonText);
+
+            var sortProductFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
+
+            var result = await sortProductFunction.GetSortedProducts(req: HttpRequestSetup(query, body),
+                log: _log.Object);
+            var resultObject = (OkObjectResult)result;
+            Assert.IsNotNull(resultObject);
+            Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
+            var targetObject = resultObject.Value as List<Product>;
+
+            Assert.AreEqual(shopperHistory[0].Products[0].Name, targetObject[0].Name);
         }
     }
 }
