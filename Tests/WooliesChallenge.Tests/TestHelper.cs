@@ -57,7 +57,7 @@ namespace WooliesChallenge.Tests
                 },
                 new ShopperHistory {
                     CustomerId = 3, Products = new List<Product>{
-                        new Product{ Name = "Test Product E", Price = 57m, Quantity = 1 },
+                        new Product{ Name = "Test Product A", Price = 57m, Quantity = 1 },
                         new Product{ Name = "Test Product F", Price = 65.2m, Quantity = 3 },
                         new Product{ Name = "Test Product G", Price = 65.7m, Quantity = 2 },
                         new Product{ Name = "Test Product H", Price = 76.4m, Quantity = 2 }

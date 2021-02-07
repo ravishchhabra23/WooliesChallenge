@@ -6,5 +6,6 @@ namespace WooliesChallenge.Application.Interfaces
     {
         Task<string> GetProducts();
         Task<string> GetShopperHistory();
+        Task<string> GetTrolleyCalculation(string input);
     }
 }

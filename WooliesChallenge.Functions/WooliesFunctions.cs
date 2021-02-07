@@ -61,6 +61,29 @@ namespace WooliesChallenge.Functions
 
             return new OkObjectResult(result);
         }
+
+        [FunctionName("GetTrolleyCalculation")]
+        public async Task<IActionResult> GetTrolleyCalculation(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Constants.RouteTrolleyCalculator)] HttpRequest req,
+            ILogger log)
+        {
+            decimal result= decimal.Zero;
+            try
+            {
+                log.LogInformation("GetTrolleyCalculation started");
+                if (req == null || req.Body == null) throw new ArgumentNullException("requset");
+
+                var trolleyRequest = await Helper.ReadRequestBody(req.Body);
+                var respResource = await _resourceService.GetTrolleyCalculation(trolleyRequest);
+                result = Helper.DeSerializeInput<decimal>(respResource);
+            }
+            catch (Exception ex)
+            {
+                log.LogError("The error occured : -" + ex.Message + " - " + ex.StackTrace);
+            }
+
+            return new OkObjectResult(result);
+        }
         //public Task OnExceptionAsync(FunctionExceptionContext exceptionContext, CancellationToken cancellationToken)
         //{
         //    log.WriteLine($"Exception raised by the application {exceptionContext.Exception.ToString()}");

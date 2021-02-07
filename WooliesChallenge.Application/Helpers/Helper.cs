@@ -2,7 +2,9 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using WooliesChallenge.Application.Models;
 
 namespace WooliesChallenge.Application.Helpers
@@ -24,8 +26,24 @@ namespace WooliesChallenge.Application.Helpers
             }
             return lstProduct;
         }
-
-
+        public static SortOption GetEnumValue(string sortOptionValue)
+        {
+            SortOption retSortOption = SortOption.Low;
+            bool isSortOptionParsed = string.IsNullOrEmpty(sortOptionValue) ? false : Enum.TryParse<SortOption>(sortOptionValue, true, out retSortOption);
+            return retSortOption;
+        }
+        public static string SerializeInput<T>(T input)
+        {
+            return JsonConvert.SerializeObject(input);
+        }
+        public static T DeSerializeInput<T>(string input)
+        {
+            return JsonConvert.DeserializeObject<T>(input);
+        }
+        public static async Task<string> ReadRequestBody(Stream inputStream)
+        {
+            return await new StreamReader(inputStream).ReadToEndAsync(); ;
+        }
         private static List<Product> Sort(List<Product> products, SortOption sortOption)
         {
             if (products?.Count == 0) throw new ArgumentNullException("products");
@@ -73,13 +91,6 @@ namespace WooliesChallenge.Application.Helpers
                 }
             }
             return dictProducts.Values.ToList().OrderByDescending(p => p.ProductSoldCount).ThenByDescending(p => p.Product.Quantity).Select(p => p.Product).ToList();
-        }
-
-        public static SortOption GetEnumValue(string sortOptionValue)
-        {
-            SortOption retSortOption = SortOption.Low;
-            bool isSortOptionParsed = string.IsNullOrEmpty(sortOptionValue) ? false : Enum.TryParse<SortOption>(sortOptionValue, true, out retSortOption);
-            return retSortOption;
         }
     }
 }

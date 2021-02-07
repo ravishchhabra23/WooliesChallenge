@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using WooliesChallenge.Application.Helpers;
 using WooliesChallenge.Application.Interfaces;
@@ -24,6 +25,13 @@ namespace WooliesChallenge.Application.Services
         {
             var uri = _httpClient.BaseAddress + Constants.ResourceBaseUrl + Constants.ShopperHistoryUrl + Constants.Token;
             var response = await _httpClient.GetAsync(uri);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+        public async Task<string> GetTrolleyCalculation(string input)
+        {
+            var uri = _httpClient.BaseAddress + Constants.ResourceBaseUrl + Constants.TrolleyCalculatorUrl + Constants.Token;
+            var response = await _httpClient.PostAsync(uri,new StringContent(input, Encoding.UTF8, Constants.ApplicationJsonType));
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
