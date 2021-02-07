@@ -71,8 +71,6 @@ namespace WooliesChallenge.Functions
             try
             {
                 log.LogInformation("GetTrolleyCalculation started");
-                if (req == null || req.Body == null) throw new ArgumentNullException("requset");
-
                 var trolleyRequest = await Helper.ReadRequestBody(req.Body);
                 var respResource = await _resourceService.GetTrolleyCalculation(trolleyRequest);
                 result = Helper.DeSerializeInput<decimal>(respResource);

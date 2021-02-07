@@ -30,6 +30,7 @@ namespace WooliesChallenge.Application.Services
         }
         public async Task<string> GetTrolleyCalculation(string input)
         {
+            if (string.IsNullOrEmpty(input)) throw new ArgumentNullException();
             var uri = _httpClient.BaseAddress + Constants.ResourceBaseUrl + Constants.TrolleyCalculatorUrl + Constants.Token;
             var response = await _httpClient.PostAsync(uri,new StringContent(input, Encoding.UTF8, Constants.ApplicationJsonType));
             response.EnsureSuccessStatusCode();

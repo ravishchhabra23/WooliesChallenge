@@ -12,5 +12,6 @@
         public const string ShopperHistoryUrl = "shopperHistory?token=";
         public const string TrolleyCalculatorUrl = "trolleyCalculator?token=";
         public const string ApplicationJsonType = "application/json";
+        public const string TestWooliesBaseUrl = "http://dev-wooliesx-recruitment.azurewebsites.net/";
     }
 }

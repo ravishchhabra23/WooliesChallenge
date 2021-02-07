@@ -190,5 +190,27 @@ namespace WooliesChallenge.Tests.FunctionTests
 
             Assert.AreEqual(shopperHistory[0].Products[0].Name, targetObject[0].Name);
         }
+
+        [TestMethod]
+        public async Task GetTrolleyCalculation_Success()
+        {
+            var query = new Dictionary<String, StringValues>();
+            string body = JsonConvert.SerializeObject(TestHelper.ReturnTrolleyInput());
+            int targetStatusCode = 200;
+            var shopperHistory = TestHelper.ReturnProductsForSortRecommended();
+            decimal targetTotal = 134m;
+            string jsonText = JsonConvert.SerializeObject(targetTotal);
+
+            _resourceService.Setup(p => p.GetTrolleyCalculation(body)).ReturnsAsync(jsonText);
+
+            var trolleyCalculationFunction = new WooliesChallenge.Functions.WooliesFunctions(_userService.Object, _resourceService.Object);
+
+            var result = await trolleyCalculationFunction.GetTrolleyCalculation(req: HttpRequestSetup(query, body),
+                log: _log.Object);
+            var resultObject = (OkObjectResult)result;
+            Assert.IsNotNull(resultObject);
+            Assert.AreEqual(resultObject.StatusCode, targetStatusCode);
+            Assert.AreEqual(targetTotal, Convert.ToDecimal(resultObject.Value));
+        }
     }
 }

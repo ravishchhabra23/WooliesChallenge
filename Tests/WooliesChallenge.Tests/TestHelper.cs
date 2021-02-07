@@ -6,24 +6,30 @@ using System.Collections.Generic;
 
 namespace WooliesChallenge.Tests
 {
-    internal static class TestHelper
+    internal class TestHelper
     {
         internal static User ReturnUser()
         {
             return new User { Name = Constants.Name, Token = Constants.Token };
         }
-        internal static HttpResponseMessage ReturnProducts()
+        internal static HttpResponseMessage ReturnProductsResponse()
         {
             string jsonText = @"[{""name"": ""Test Product A"",""price"": 99.99,""quantity"": 0 },
                                    {""name"": ""Test Product B"",""price"": 101.99,""quantity"": 0}]";
             var content = new StringContent(jsonText);
             return new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = content };
         }
-        internal static HttpResponseMessage ReturnShopperHistory()
+        internal static HttpResponseMessage ReturnShopperHistoryResponse()
         {
             string jsonText = @"[{""customerId"": 123,""products"":[{ ""name"": ""Test Product A"",""price"": 99.99,""quantity"": 0 },
                                    {""name"": ""Test Product B"",""price"": 101.99,""quantity"": 0}]}]";
             var content = new StringContent(jsonText);
+            return new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = content };
+        }
+
+        internal static HttpResponseMessage ReturnTrolleyCalculationResponse()
+        {
+            var content = new StringContent(System.Convert.ToString(134m));
             return new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = content };
         }
         internal static List<Product> ReturnProductsForSort()
@@ -64,6 +70,34 @@ namespace WooliesChallenge.Tests
                     }
                 },
 
+            };
+
+        }
+
+        internal static TrolleyCalculationModel ReturnTrolleyInput()
+        {
+            return new TrolleyCalculationModel
+            {
+                Products = new List<Product>
+                {
+                    new Product{ Name = "Test Product A", Price = 76m, Quantity = 1 },
+                },
+                Specials = new List<Special>
+                {
+                    new Special{ Quantities =  new List<Quantity>{
+                        new Quantity
+                        {
+                            Name = "Test Product A",
+                            QuantityCount = 4
+                        }
+                    },
+                    Total = 67
+                    },
+                },
+                Quantities = new List<Quantity>
+                {
+                    new Quantity{ Name = "Test product A",QuantityCount = 8}
+                }
             };
 
         }
